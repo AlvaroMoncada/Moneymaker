@@ -84,19 +84,43 @@ php artisan key:generate
 
 ### 6. Configurar la Base de Datos y ejecutar migraciones
 
-Por defecto el proyecto utiliza **SQLite**. Si el archivo de base de datos no existe, puedes crearlo:
+Tienes dos opciones según cómo prefieras trabajar:
 
-**En Linux / macOS:**
-```bash
-touch database/database.sqlite
-```
+#### **Opción A: Sin Laragon (SQLite - Rápido y sin instalar servidores)**
+Laravel 11 incluye soporte directo para SQLite sin necesidad de instalar ni arrancar MySQL o Laragon.
 
-**En Windows (PowerShell):**
-```powershell
-New-Item -ItemType File -Path database\database.sqlite -Force
-```
+1. Si no existe el archivo de base de datos, créalo:
+   - **En Windows (PowerShell):**
+     ```powershell
+     New-Item -ItemType File -Path database\database.sqlite -Force
+     ```
+   - **En Linux / macOS:**
+     ```bash
+     touch database/database.sqlite
+     ```
+2. En tu `.env`, asegúrate de tener:
+   ```env
+   DB_CONNECTION=sqlite
+   ```
 
-Ejecuta las migraciones (y seeders si deseas datos de prueba):
+#### **Opción B: Con Laragon / XAMPP (MySQL)**
+Si prefieres usar MySQL con **Laragon**:
+1. Inicia **Laragon** y pulsa en **"Start All"** (para arrancar MySQL).
+2. Crea una base de datos (por ejemplo, llamada `moneymaker` o `ProyectoDaw`) desde phpMyAdmin o HeidiSQL.
+3. En tu archivo `.env`, configura la conexión:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=ProyectoDaw
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+
+---
+
+#### Ejecutar las migraciones
+Una vez configurada la base de datos (SQLite o MySQL), ejecuta:
 ```bash
 php artisan migrate
 ```
