@@ -1,6 +1,6 @@
-# 💼 Moneymaker
+# 💼 misVentas
 
-Moneymaker es una aplicación web integral para la **gestión y control de clientes, ventas y comisiones**, diseñada para ofrecer una experiencia fluida, reactiva y moderna tanto para el equipo comercial como para la administración.
+misVentas es una aplicación web integral para la **gestión y control de clientes, ventas y comisiones**, diseñada para ofrecer una experiencia fluida, reactiva y moderna tanto para el equipo comercial como para la administración.
 
 ---
 
@@ -50,8 +50,8 @@ Sigue estos pasos ordenados para clonar, configurar y ejecutar el proyecto en tu
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/AlvaroMoncada/Moneymaker.git
-cd Moneymaker
+git clone https://github.com/AlvaroMoncada/misVentas.git
+cd misVentas
 ```
 
 ### 2. Instalar dependencias del Backend (PHP)
@@ -106,7 +106,7 @@ Laravel 11 incluye soporte directo para SQLite sin necesidad de instalar ni arra
 #### **Opción B: Con Laragon / XAMPP (MySQL)**
 Si prefieres usar MySQL con **Laragon**:
 1. Inicia **Laragon** y pulsa en **"Start All"** (para arrancar MySQL).
-2. Crea una base de datos (por ejemplo, llamada `moneymaker` o `ProyectoDaw`) desde phpMyAdmin o HeidiSQL.
+2. Crea una base de datos (por ejemplo, llamada `misVentas` o `ProyectoDaw`) desde phpMyAdmin o HeidiSQL.
 3. En tu archivo `.env`, configura la conexión:
    ```env
    DB_CONNECTION=mysql
@@ -141,7 +141,7 @@ El servidor backend se ejecutará en: [http://localhost:8000](http://localhost:8
 npm run dev
 ```
 
-¡Listo! Abre tu navegador en [http://localhost:8000](http://localhost:8000) para acceder a Moneymaker.
+¡Listo! Abre tu navegador en [http://localhost:8000](http://localhost:8000) para acceder a misVentas.
 
 ---
 
@@ -173,7 +173,7 @@ npm run build
 ## 📂 Estructura del Proyecto
 
 ```text
-Moneymaker/
+misVentas/
 ├── app/
 │   ├── Http/Controllers/    # Controladores (Client, Sell, Comission, Profile...)
 │   └── Models/                 # Modelos Eloquent (Client, Sell, Comission, User)

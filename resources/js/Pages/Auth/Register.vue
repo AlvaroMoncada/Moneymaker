@@ -24,7 +24,7 @@ const submit = () => {
     <div class="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
       <!-- Cabecera con logo -->
       <div class="bg-purple-600 text-white text-center py-4">
-        <h2 class="text-2xl font-bold">MoneyMaker</h2>
+        <h2 class="text-2xl font-bold">misVentas</h2>
       </div>
       
       <div class="p-6">

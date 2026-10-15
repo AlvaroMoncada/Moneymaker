@@ -24,7 +24,7 @@
       class="fixed inset-y-0 left-0 z-20 w-64 mt-16 overflow-y-auto bg-gradient-to-b from-purple-800 to-purple-900 shadow-xl md:hidden rounded-r-lg">
       <div class="py-6 text-white">
         <Link class="block text-center text-2xl font-bold text-gray-100" :href="route('sells.index')">
-          Moneymaker
+          misVentas
         </Link>
         <ul class="mt-8 space-y-2">
           <li>

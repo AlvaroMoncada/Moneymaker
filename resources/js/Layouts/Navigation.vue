@@ -2,7 +2,7 @@
   <aside class="z-20 hidden w-64 bg-gradient-to-b from-purple-800 to-purple-900 md:block flex-shrink-0 shadow-lg">
     <div class="py-6 text-white">
       <Link class="block text-center text-2xl font-bold text-gray-100" :href="route('sells.index')">
-        Moneymaker
+        misVentas
       </Link>
 
       <ul class="mt-8">
