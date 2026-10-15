@@ -7,6 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputGroup from '@/Components/InputGroup.vue';
 import SelectInput from '@/Components/SelectInput.vue';
+import MiniCalendar from '@/Components/MiniCalendar.vue';
 import Modal from '@/Components/Modal.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { ref } from 'vue';
@@ -34,6 +35,11 @@ const title = ref('');
 const operation = ref(1);
 const msj = ref('');
 const classMsj = ref('hidden');
+const selectedCalendarDate = ref(null);
+
+const onCalendarSelectDay = (dateStr) => {
+  selectedCalendarDate.value = dateStr;
+};
 
 const openModal = (type, sell = {}) => {
   if (type === 'form') {
@@ -141,12 +147,25 @@ const formatDate = (dateStr) => {
       </div>
     </template>
 
-    <!-- Tarjeta de Ganancia Total -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
-      <h2 class="text-lg font-bold text-gray-700">Ganancias Totales</h2>
-      <p class="text-2xl text-green-600 font-semibold mt-2">
-        {{ totalEarnings.toFixed(2) }} €
-      </p>
+    <!-- Sección Superior: Métricas y Calendario en la esquina -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <!-- Tarjeta de Ganancia Total (Ocupa 2 columnas en medianas y grandes) -->
+      <div class="md:col-span-2 bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-gray-700">Ganancias Totales</h2>
+          <p class="text-sm text-gray-400 mt-1">Acumulado total de comisiones por ventas realizadas</p>
+        </div>
+        <div class="mt-4">
+          <p class="text-3xl text-green-600 font-extrabold">
+            {{ totalEarnings.toFixed(2) }} €
+          </p>
+        </div>
+      </div>
+
+      <!-- Calendario en la esquina (Ocupa 1 columna) -->
+      <div class="md:col-span-1">
+        <MiniCalendar @select-day="onCalendarSelectDay" />
+      </div>
     </div>
 
     <!-- Tabla de Ventas -->
