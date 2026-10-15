@@ -11,26 +11,25 @@ use Illuminate\Support\Facades\Storage;
 
 class SellController extends Controller
 {
-    // RECIBIR DATOS - SOLO VENTAS, CLIENTES Y COMISIONES DEL USUARIO AUTENTICADO
+    // RECIBIR DATOS - SOLO VENTAS Y CLIENTES DEL USUARIO AUTENTICADO
     public function index()
     {
         $sells = Sell::where('user_id', auth()->id()) // Solo ventas del usuario autenticado
-            ->with(['client', 'comission'])
+            ->with(['client'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
     
         // Obtener TODAS las ventas sin paginación para calcular la ganancia total
-        $allSells = Sell::where('user_id', auth()->id())->with('comission')->get();
+        $allSells = Sell::where('user_id', auth()->id())->get();
     
         // Calcular el total de ganancias
         $totalEarnings = $allSells->sum(function ($sell) {
-            return ($sell->price * ($sell->comission->comissionPercent ?? 0)) / 100;
+            return ($sell->price * ($sell->comission ?? 0)) / 100;
         });
     
         return Inertia::render('Sells/Index', [
             'sells' => $sells,
             'clients' => Client::where('user_id', auth()->id())->orderBy('name', 'asc')->get(),
-            'comissions' => Comission::where('user_id', auth()->id())->orderBy('comissionPercent', 'asc')->get(),
             'totalEarnings' => $totalEarnings, // Enviar el total de ganancias al frontend
         ]);
     }
@@ -42,19 +41,18 @@ class SellController extends Controller
         $request->validate([
             'title' =>'required|max:100',
             'price' =>'required|numeric|max:9999999999999',
+            'comission' => 'required|numeric|min:0|max:100',
             'client_id' => 'required|exists:clients,id',
-            'comission_id' => 'required|exists:comissions,id'
         ]);
 
-        // Asegurar que el cliente y la comisión pertenezcan al usuario autenticado
+        // Asegurar que el cliente pertenezca al usuario autenticado
         $client = Client::where('id', $request->client_id)->where('user_id', auth()->id())->firstOrFail();
-        $comission = Comission::where('id', $request->comission_id)->where('user_id', auth()->id())->firstOrFail();
 
         $sell = new Sell([
             'title' => $request->title,
             'price' => $request->price,
+            'comission' => $request->comission,
             'client_id' => $client->id,
-            'comission_id' => $comission->id,
             'user_id' => auth()->id(), // Asignar el usuario autenticado
         ]);
 
@@ -69,8 +67,8 @@ class SellController extends Controller
         $request->validate([
             'title' =>'required|max:100',
             'price' =>'required|numeric|max:9999999999999',
+            'comission' => 'required|numeric|min:0|max:100',
             'client_id' => 'required|exists:clients,id',
-            'comission_id' => 'required|exists:comissions,id'
         ]);
 
         // Asegurar que la venta pertenece al usuario autenticado
@@ -78,15 +76,14 @@ class SellController extends Controller
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        // Asegurar que el cliente y la comisión pertenezcan al usuario autenticado
+        // Asegurar que el cliente pertenezca al usuario autenticado
         $client = Client::where('id', $request->client_id)->where('user_id', auth()->id())->firstOrFail();
-        $comission = Comission::where('id', $request->comission_id)->where('user_id', auth()->id())->firstOrFail();
 
         $sell->update([
             'title' => $request->title,
             'price' => $request->price,
+            'comission' => $request->comission,
             'client_id' => $client->id,
-            'comission_id' => $comission->id,
         ]);
 
         return redirect()->route('sells.index');

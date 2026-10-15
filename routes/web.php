@@ -3,7 +3,6 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SellController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\ComissionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,10 +26,9 @@ Route::middleware('auth')->group(function () {
     // Elimina el perfil del usuario.
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rutas de recursos para gestionar ventas, clientes y comisiones.
+    // Rutas de recursos para gestionar ventas y clientes.
     Route::resource('sells', SellController::class);
     Route::resource('clients', ClientController::class);
-    Route::resource('comissions', ComissionController::class);
 
 });
 

@@ -46,16 +46,6 @@
               Clientes
             </ResponsiveNavLink>
           </li>
-
-          <li>
-            <ResponsiveNavLink 
-              :href="route('comissions.index')" 
-              :active="route().current('comissions.index')" 
-              class="block px-6 py-3 rounded-lg transition-all duration-300 hover:bg-purple-700"
-            >
-              Comisiones
-            </ResponsiveNavLink>
-          </li>
         </ul>
       </div>
     </aside>

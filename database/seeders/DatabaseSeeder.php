@@ -15,16 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear usuarios con clientes, comisiones y ventas asociadas
+        // Crear usuarios con clientes y ventas asociadas
         User::factory(6)->create()->each(function ($user) {
             $clients = Client::factory(3)->create(['user_id' => $user->id]); // Cada usuario tendrá 3 clientes
-            $comissions = Comission::factory(3)->create(['user_id' => $user->id]); // Cada usuario tendrá 3 comisiones
 
-            // Crear 3 ventas por usuario, asociadas a sus clientes y comisiones
+            // Crear 3 ventas por usuario, asociadas a sus clientes
             Sell::factory(3)->create([
                 'user_id' => $user->id,
                 'client_id' => $clients->random()->id, // Asigna aleatoriamente uno de sus clientes
-                'comission_id' => $comissions->random()->id, // Asigna aleatoriamente una de sus comisiones
+                'comission' => rand(5, 20),
             ]);
         });
     }

@@ -25,16 +25,6 @@
             Clientes
           </NavLink>
         </li>
-
-        <li>
-          <NavLink 
-            :href="route('comissions.index')" 
-            :active="route().current('comissions.index')" 
-            class="block px-6 py-6 rounded-lg transition-all duration-300 hover:bg-purple-700"
-          >
-            Comisiones
-          </NavLink>
-        </li>
       </ul>
     </div>
   </aside>

@@ -13,8 +13,8 @@ class Sell extends Model
     protected $fillable = [
         'price',
         'title',
+        'comission',
         'client_id',
-        'comission_id',
         'user_id', // Permitir asignación masiva del usuario
     ];
 
@@ -24,14 +24,6 @@ class Sell extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
-    }
-
-    /**
-     * Relación uno a uno inversa con el modelo Comission.
-     */
-    public function comission(): BelongsTo
-    {
-        return $this->belongsTo(Comission::class);
     }
 
     /**

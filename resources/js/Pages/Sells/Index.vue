@@ -6,7 +6,6 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputGroup from '@/Components/InputGroup.vue';
 import SelectInput from '@/Components/SelectInput.vue';
-import SelectInputCom from '@/Components/SelectInputCom.vue';
 import Modal from '@/Components/Modal.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { ref } from 'vue';
@@ -14,11 +13,10 @@ import { ref } from 'vue';
 const props = defineProps({
   sells: { type: Object },
   clients: { type: Object },
-  comissions: { type: Object },
   totalEarnings: { type: Number }, 
 });
 
-const form = useForm({ title: '', price: '', client_id: '', comission_id: '' });
+const form = useForm({ title: '', price: '', comission: '', client_id: '' });
 const selectedSell = ref({});
 const showModalForm = ref(false);
 const showModalDel = ref(false);
@@ -33,8 +31,8 @@ const openModal = (type, sell = {}) => {
     title.value = sell.id ? 'Editar venta' : 'Crear venta';
     form.title = sell.title || '';
     form.price = sell.price || '';
+    form.comission = sell.comission !== undefined && sell.comission !== null ? sell.comission : '';
     form.client_id = sell.client_id || '';
-    form.comission_id = sell.comission_id || '';
     selectedSell.value.id = sell.id || null;
     showModalForm.value = true;
   } else if (type === 'delete') {
@@ -93,8 +91,8 @@ const showSuccessMessage = (message) => {
 
 // Función para calcular la ganancia basada en la comisión
 const calculateEarnings = (sell) => {
-  if (!sell.price || !sell.comission) return 0;
-  return (parseFloat(sell.price) * parseFloat(sell.comission.comissionPercent)) / 100;
+  if (!sell.price || sell.comission === undefined || sell.comission === null) return 0;
+  return (parseFloat(sell.price) * parseFloat(sell.comission)) / 100;
 };
 
 </script>
@@ -138,7 +136,7 @@ const calculateEarnings = (sell) => {
               <th class="px-4 py-3">Descripción</th>
               <th class="px-4 py-3">Cliente</th>
               <th class="px-4 py-3">Precio</th>
-              <th class="px-4 py-3">Comisión</th>
+              <th class="px-4 py-3">Comisión (%)</th>
               <th class="px-4 py-3">Ganancia</th>
               <th class="px-4 py-3 text-center">Opciones</th>
             </tr>
@@ -148,7 +146,7 @@ const calculateEarnings = (sell) => {
               <td class="px-4 py-3 text-sm">{{ sell.title }}</td>
               <td class="px-4 py-3 text-sm">{{ sell.client?.name }}</td>
               <td class="px-4 py-3 text-sm">{{ sell.price }} €</td>
-              <td class="px-4 py-3 text-sm">{{ sell.comission?.comissionPercent}}%</td>
+              <td class="px-4 py-3 text-sm">{{ sell.comission }} %</td>
               <td class="px-4 py-3 text-sm">{{ calculateEarnings(sell).toFixed(2) }} €</td>
               <td class="px-4 py-3 flex justify-center space-x-2">
                 <PrimaryButton @click="openModal('form', sell)">
@@ -175,9 +173,9 @@ const calculateEarnings = (sell) => {
         <h2 class="text-lg font-medium">{{ title }}</h2>
         <div class="space-y-6 mt-4">
           <InputGroup :text="'Descripción de la venta'" :required="'required'" v-model="form.title" />
-          <InputGroup :text="'Precio'" :required="'required'" v-model="form.price" />
+          <InputGroup :text="'Precio (€)'" :type="'number'" :required="'required'" v-model="form.price" />
+          <InputGroup :text="'Comisión (%)'" :type="'number'" :required="'required'" v-model="form.comission" />
           <SelectInput :text="'Cliente'" :required="'required'" v-model="form.client_id" :options="clients" />
-          <SelectInputCom :text="'Comisión'" :required="'required'" v-model="form.comission_id" :options="comissions" />
         </div>
       </div>
       <div class="flex justify-end mt-4 space-x-2 p-4">
