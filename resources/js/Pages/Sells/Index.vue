@@ -4,6 +4,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputLabel from '@/Components/InputLabel.vue';
 import InputGroup from '@/Components/InputGroup.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import Modal from '@/Components/Modal.vue';
@@ -16,7 +17,16 @@ const props = defineProps({
   totalEarnings: { type: Number }, 
 });
 
-const form = useForm({ title: '', price: '', comission: '', client_id: '' });
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
+const form = useForm({
+  title: '',
+  price: '',
+  comission: '',
+  sell_date: getTodayDate(),
+  client_id: '',
+});
+
 const selectedSell = ref({});
 const showModalForm = ref(false);
 const showModalDel = ref(false);
@@ -32,6 +42,7 @@ const openModal = (type, sell = {}) => {
     form.title = sell.title || '';
     form.price = sell.price || '';
     form.comission = sell.comission !== undefined && sell.comission !== null ? sell.comission : '';
+    form.sell_date = sell.sell_date ? sell.sell_date.substring(0, 10) : getTodayDate();
     form.client_id = sell.client_id || '';
     selectedSell.value.id = sell.id || null;
     showModalForm.value = true;
@@ -44,6 +55,7 @@ const openModal = (type, sell = {}) => {
 const closeModal = (type) => {
   if (type === 'form') {
     form.reset();
+    form.sell_date = getTodayDate();
     showModalForm.value = false;
   }
   if (type === 'delete') showModalDel.value = false;
@@ -95,6 +107,16 @@ const calculateEarnings = (sell) => {
   return (parseFloat(sell.price) * parseFloat(sell.comission)) / 100;
 };
 
+// Formatear fecha para la tabla (DD/MM/YYYY)
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-';
+  const parts = dateStr.substring(0, 10).split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+};
+
 </script>
 
 
@@ -133,6 +155,7 @@ const calculateEarnings = (sell) => {
         <table class="w-full whitespace-no-wrap">
           <thead>
             <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 border-b bg-purple-50">
+              <th class="px-4 py-3">Fecha</th>
               <th class="px-4 py-3">Descripción</th>
               <th class="px-4 py-3">Cliente</th>
               <th class="px-4 py-3">Precio</th>
@@ -143,6 +166,7 @@ const calculateEarnings = (sell) => {
           </thead>
           <tbody class="bg-white divide-y">
             <tr v-for="sell in sells.data" :key="sell.id" class="text-gray-700">
+              <td class="px-4 py-3 text-sm whitespace-nowrap">{{ formatDate(sell.sell_date) }}</td>
               <td class="px-4 py-3 text-sm">{{ sell.title }}</td>
               <td class="px-4 py-3 text-sm">{{ sell.client?.name }}</td>
               <td class="px-4 py-3 text-sm">{{ sell.price }} €</td>
@@ -170,15 +194,36 @@ const calculateEarnings = (sell) => {
     <!-- Modal Formulario -->
     <Modal :show="showModalForm" @close="closeModal('form')">
       <div class="p-6">
-        <h2 class="text-lg font-medium">{{ title }}</h2>
-        <div class="space-y-6 mt-4">
-          <InputGroup :text="'Descripción de la venta'" :required="'required'" v-model="form.title" />
-          <InputGroup :text="'Precio (€)'" :type="'number'" :required="'required'" v-model="form.price" />
-          <InputGroup :text="'Comisión (%)'" :type="'number'" :required="'required'" v-model="form.comission" />
-          <SelectInput :text="'Cliente'" :required="'required'" v-model="form.client_id" :options="clients" />
+        <h2 class="text-lg font-semibold text-purple-900 border-b pb-2">{{ title }}</h2>
+        <div class="space-y-4 mt-4">
+          <div>
+            <InputLabel value="Descripción de la venta" class="font-medium text-gray-700 mb-1" />
+            <InputGroup :text="'Ej. Venta de servicio web'" :required="'required'" v-model="form.title" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <InputLabel value="Precio (€)" class="font-medium text-gray-700 mb-1" />
+              <InputGroup :text="'0.00'" :type="'number'" :required="'required'" v-model="form.price" />
+            </div>
+            <div>
+              <InputLabel value="Comisión (%)" class="font-medium text-gray-700 mb-1" />
+              <InputGroup :text="'0.00'" :type="'number'" :required="'required'" v-model="form.comission" />
+            </div>
+          </div>
+
+          <div>
+            <InputLabel value="Fecha de la venta" class="font-medium text-gray-700 mb-1" />
+            <InputGroup :text="'Fecha de la venta'" :type="'date'" :required="'required'" v-model="form.sell_date" />
+          </div>
+
+          <div>
+            <InputLabel value="Cliente" class="font-medium text-gray-700 mb-1" />
+            <SelectInput :text="'Selecciona un cliente'" :required="'required'" v-model="form.client_id" :options="clients" />
+          </div>
         </div>
       </div>
-      <div class="flex justify-end mt-4 space-x-2 p-4">
+      <div class="flex justify-end mt-4 space-x-2 p-4 bg-gray-50 rounded-b-lg">
         <SecondaryButton @click="closeModal('form')">Cancelar</SecondaryButton>
         <PrimaryButton @click="saveSell">Guardar</PrimaryButton>
       </div>

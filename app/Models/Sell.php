@@ -14,8 +14,13 @@ class Sell extends Model
         'price',
         'title',
         'comission',
+        'sell_date',
         'client_id',
         'user_id', // Permitir asignación masiva del usuario
+    ];
+
+    protected $casts = [
+        'sell_date' => 'date:Y-m-d',
     ];
 
     /**

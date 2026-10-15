@@ -42,6 +42,7 @@ class SellController extends Controller
             'title' =>'required|max:100',
             'price' =>'required|numeric|max:9999999999999',
             'comission' => 'required|numeric|min:0|max:100',
+            'sell_date' => 'required|date',
             'client_id' => 'required|exists:clients,id',
         ]);
 
@@ -52,6 +53,7 @@ class SellController extends Controller
             'title' => $request->title,
             'price' => $request->price,
             'comission' => $request->comission,
+            'sell_date' => $request->sell_date,
             'client_id' => $client->id,
             'user_id' => auth()->id(), // Asignar el usuario autenticado
         ]);
@@ -68,6 +70,7 @@ class SellController extends Controller
             'title' =>'required|max:100',
             'price' =>'required|numeric|max:9999999999999',
             'comission' => 'required|numeric|min:0|max:100',
+            'sell_date' => 'required|date',
             'client_id' => 'required|exists:clients,id',
         ]);
 
@@ -83,6 +86,7 @@ class SellController extends Controller
             'title' => $request->title,
             'price' => $request->price,
             'comission' => $request->comission,
+            'sell_date' => $request->sell_date,
             'client_id' => $client->id,
         ]);
 
