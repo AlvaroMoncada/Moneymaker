@@ -17,10 +17,10 @@ class SellFactory extends Factory
         $user = User::factory()->create(); // Genera un usuario y lo asigna
 
         return [
-            'price' => $this->faker->numberBetween(1, 10), // Genera un número entre 1 y 10
+            'price' => $this->faker->numberBetween(1, 100),
             'title' => $this->faker->sentence(3),
+            'comission' => $this->faker->numberBetween(1, 20),
             'client_id' => Client::factory()->create(['user_id' => $user->id])->id, // Cliente del mismo usuario
-            'comission_id' => Comission::factory()->create(['user_id' => $user->id])->id, // Comisión del mismo usuario
             'user_id' => $user->id, // Asigna el usuario autenticado
         ];        
     }

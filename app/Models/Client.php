@@ -9,7 +9,7 @@ class Client extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'user_id']; // Permitir asignación masiva de 'user_id'
+    protected $fillable = ['name', 'address', 'user_id']; // Permitir asignación masiva de 'user_id' y 'address'
 
     // Relación con el usuario
     public function user()

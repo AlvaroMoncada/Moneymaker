@@ -11,27 +11,44 @@ use Illuminate\Support\Facades\Storage;
 
 class SellController extends Controller
 {
-    // RECIBIR DATOS - SOLO VENTAS, CLIENTES Y COMISIONES DEL USUARIO AUTENTICADO
+    // RECIBIR DATOS - SOLO VENTAS Y CLIENTES DEL USUARIO AUTENTICADO
     public function index()
     {
         $sells = Sell::where('user_id', auth()->id()) // Solo ventas del usuario autenticado
-            ->with(['client', 'comission'])
+            ->with(['client'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
     
-        // Obtener TODAS las ventas sin paginación para calcular la ganancia total
-        $allSells = Sell::where('user_id', auth()->id())->with('comission')->get();
+        // Obtener TODAS las ventas sin paginación para calcular la ganancia total y eventos del calendario
+        $allSells = Sell::where('user_id', auth()->id())->with(['client'])->get();
     
         // Calcular el total de ganancias
         $totalEarnings = $allSells->sum(function ($sell) {
-            return ($sell->price * ($sell->comission->comissionPercent ?? 0)) / 100;
+            return ($sell->price * ($sell->comission ?? 0)) / 100;
         });
+
+        // Eventos del calendario para próximas visitas
+        $calendarEvents = $allSells->filter(function ($sell) {
+            return !empty($sell->next_visit);
+        })->map(function ($sell) {
+            $formattedDate = $sell->next_visit instanceof \DateTimeInterface 
+                ? $sell->next_visit->format('Y-m-d') 
+                : substr((string)$sell->next_visit, 0, 10);
+
+            return [
+                'id' => $sell->id,
+                'date' => $formattedDate,
+                'title' => $sell->title,
+                'client_name' => $sell->client?->name ?? 'Sin cliente',
+                'price' => $sell->price,
+            ];
+        })->values();
     
         return Inertia::render('Sells/Index', [
             'sells' => $sells,
             'clients' => Client::where('user_id', auth()->id())->orderBy('name', 'asc')->get(),
-            'comissions' => Comission::where('user_id', auth()->id())->orderBy('comissionPercent', 'asc')->get(),
             'totalEarnings' => $totalEarnings, // Enviar el total de ganancias al frontend
+            'calendarEvents' => $calendarEvents, // Enviar eventos de visitas al calendario
         ]);
     }
     
@@ -42,19 +59,22 @@ class SellController extends Controller
         $request->validate([
             'title' =>'required|max:100',
             'price' =>'required|numeric|max:9999999999999',
+            'comission' => 'required|numeric|min:0|max:100',
+            'sell_date' => 'required|date',
+            'next_visit' => 'nullable|date',
             'client_id' => 'required|exists:clients,id',
-            'comission_id' => 'required|exists:comissions,id'
         ]);
 
-        // Asegurar que el cliente y la comisión pertenezcan al usuario autenticado
+        // Asegurar que el cliente pertenezca al usuario autenticado
         $client = Client::where('id', $request->client_id)->where('user_id', auth()->id())->firstOrFail();
-        $comission = Comission::where('id', $request->comission_id)->where('user_id', auth()->id())->firstOrFail();
 
         $sell = new Sell([
             'title' => $request->title,
             'price' => $request->price,
+            'comission' => $request->comission,
+            'sell_date' => $request->sell_date,
+            'next_visit' => $request->next_visit,
             'client_id' => $client->id,
-            'comission_id' => $comission->id,
             'user_id' => auth()->id(), // Asignar el usuario autenticado
         ]);
 
@@ -69,8 +89,10 @@ class SellController extends Controller
         $request->validate([
             'title' =>'required|max:100',
             'price' =>'required|numeric|max:9999999999999',
+            'comission' => 'required|numeric|min:0|max:100',
+            'sell_date' => 'required|date',
+            'next_visit' => 'nullable|date',
             'client_id' => 'required|exists:clients,id',
-            'comission_id' => 'required|exists:comissions,id'
         ]);
 
         // Asegurar que la venta pertenece al usuario autenticado
@@ -78,15 +100,16 @@ class SellController extends Controller
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        // Asegurar que el cliente y la comisión pertenezcan al usuario autenticado
+        // Asegurar que el cliente pertenezca al usuario autenticado
         $client = Client::where('id', $request->client_id)->where('user_id', auth()->id())->firstOrFail();
-        $comission = Comission::where('id', $request->comission_id)->where('user_id', auth()->id())->firstOrFail();
 
         $sell->update([
             'title' => $request->title,
             'price' => $request->price,
+            'comission' => $request->comission,
+            'sell_date' => $request->sell_date,
+            'next_visit' => $request->next_visit,
             'client_id' => $client->id,
-            'comission_id' => $comission->id,
         ]);
 
         return redirect()->route('sells.index');

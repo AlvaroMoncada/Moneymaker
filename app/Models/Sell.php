@@ -13,9 +13,16 @@ class Sell extends Model
     protected $fillable = [
         'price',
         'title',
+        'comission',
+        'sell_date',
+        'next_visit',
         'client_id',
-        'comission_id',
         'user_id', // Permitir asignación masiva del usuario
+    ];
+
+    protected $casts = [
+        'sell_date' => 'date:Y-m-d',
+        'next_visit' => 'date:Y-m-d',
     ];
 
     /**
@@ -24,14 +31,6 @@ class Sell extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
-    }
-
-    /**
-     * Relación uno a uno inversa con el modelo Comission.
-     */
-    public function comission(): BelongsTo
-    {
-        return $this->belongsTo(Comission::class);
     }
 
     /**
