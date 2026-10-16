@@ -3,18 +3,21 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SellController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Ruta para la página de inicio. Redirige al usuario a '/sells'.
+// Ruta para la página de inicio. Redirige al usuario al dashboard.
 Route::get('/', function () {
-    // Redirige directamente a '/sells'.
-    return redirect('/sells');
+    return redirect()->route('dashboard');
 });
 
 // Agrupa las rutas que requieren autenticación.
 Route::middleware('auth')->group(function () {
+    // Pantalla Principal (Dashboard)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     // Ruta para la página 'About'. Renderiza la vista 'About'.
     Route::get('/about', fn () => Inertia::render('About'))->name('about');
 

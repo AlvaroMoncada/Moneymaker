@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -93,11 +93,27 @@ const showSuccessMessage = (message) => {
     </div>
 
     <template #header>
-      <div class="flex justify-between items-center w-full">
-        <h1 class="text-lg font-bold">Clientes</h1>
-        <PrimaryButton @click="openModal('form')">
-          Añadir
-        </PrimaryButton>
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 w-full">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Directorio de Clientes</h1>
+          <p class="text-xs text-gray-500 mt-0.5">Administra los datos de contacto y ubicaciones de tus clientes</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <Link :href="route('dashboard')">
+            <SecondaryButton class="flex items-center space-x-1.5 !py-2 !px-4">
+              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Pantalla Principal</span>
+            </SecondaryButton>
+          </Link>
+          <PrimaryButton @click="openModal('form')" class="flex items-center space-x-1.5 !py-2 !px-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <span>Añadir Cliente</span>
+          </PrimaryButton>
+        </div>
       </div>
     </template>
 

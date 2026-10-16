@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -149,67 +149,29 @@ const formatDate = (dateStr) => {
     </div>
     
     <template #header>
-      <div class="flex justify-between items-center w-full">
-        <h1 class="text-lg font-bold">Ventas</h1>
-        <PrimaryButton @click="openModal('form')">
-          Añadir
-        </PrimaryButton>
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 w-full">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Gestión de Ventas</h1>
+          <p class="text-xs text-gray-500 mt-0.5">Crea, edita y consulta el historial completo de ventas</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <Link :href="route('dashboard')">
+            <SecondaryButton class="flex items-center space-x-1.5 !py-2 !px-4">
+              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Pantalla Principal</span>
+            </SecondaryButton>
+          </Link>
+          <PrimaryButton @click="openModal('form')" class="flex items-center space-x-1.5 !py-2 !px-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Añadir Venta</span>
+          </PrimaryButton>
+        </div>
       </div>
     </template>
-
-    <!-- Sección Superior: Métricas y Calendario en la esquina -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <!-- Tarjeta de Ganancia Total (Ocupa 2 columnas en medianas y grandes) -->
-      <div class="md:col-span-2 bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-        <div>
-          <h2 class="text-lg font-bold text-gray-700">Ganancias Totales</h2>
-          <p class="text-sm text-gray-400 mt-1">Acumulado total de comisiones por ventas realizadas</p>
-        </div>
-        <div class="mt-4">
-          <p class="text-3xl text-green-600 font-extrabold">
-            {{ totalEarnings.toFixed(2) }} €
-          </p>
-        </div>
-
-        <!-- Panel de Visitas del Día Seleccionado en el Calendario -->
-        <div v-if="selectedCalendarDate" class="mt-6 pt-4 border-t border-gray-100">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-semibold text-purple-900">
-              Visitas programadas para el {{ formatDate(selectedCalendarDate) }}
-            </h3>
-            <button
-              @click="selectedCalendarDate = null"
-              class="text-xs text-gray-400 hover:text-gray-600 underline"
-            >
-              Cerrar filtro
-            </button>
-          </div>
-          <div v-if="selectedDayEvents.length > 0" class="mt-2 space-y-2">
-            <div
-              v-for="item in selectedDayEvents"
-              :key="item.id"
-              class="flex items-center justify-between p-2.5 rounded-md bg-purple-50 border border-purple-100 text-sm"
-            >
-              <div>
-                <span class="font-bold text-purple-950">{{ item.client_name }}</span>
-                <span class="text-gray-600 ml-2">({{ item.title }})</span>
-              </div>
-              <span class="text-xs font-semibold px-2 py-0.5 rounded bg-purple-200 text-purple-800">
-                {{ item.price }} €
-              </span>
-            </div>
-          </div>
-          <p v-else class="text-xs text-gray-400 mt-1 italic">
-            No hay visitas agendadas para este día.
-          </p>
-        </div>
-      </div>
-
-      <!-- Calendario en la esquina (Ocupa 1 columna) -->
-      <div class="md:col-span-1">
-        <MiniCalendar :events="calendarEvents" @select-day="onCalendarSelectDay" />
-      </div>
-    </div>
 
     <!-- Tabla de Ventas -->
     <div class="w-full overflow-hidden rounded-lg border shadow-md">
