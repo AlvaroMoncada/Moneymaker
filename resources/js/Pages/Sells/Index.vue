@@ -10,12 +10,13 @@ import SelectInput from '@/Components/SelectInput.vue';
 import MiniCalendar from '@/Components/MiniCalendar.vue';
 import Modal from '@/Components/Modal.vue';
 import Pagination from '@/Components/Pagination.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
   sells: { type: Object },
   clients: { type: Object },
-  totalEarnings: { type: Number }, 
+  totalEarnings: { type: Number },
+  calendarEvents: { type: Array, default: () => [] },
 });
 
 const getTodayDate = () => new Date().toISOString().split('T')[0];
@@ -25,6 +26,7 @@ const form = useForm({
   price: '',
   comission: '',
   sell_date: getTodayDate(),
+  next_visit: '',
   client_id: '',
 });
 
@@ -41,6 +43,12 @@ const onCalendarSelectDay = (dateStr) => {
   selectedCalendarDate.value = dateStr;
 };
 
+// Visitas programadas para el día seleccionado en el calendario
+const selectedDayEvents = computed(() => {
+  if (!selectedCalendarDate.value || !props.calendarEvents) return [];
+  return props.calendarEvents.filter((ev) => ev.date === selectedCalendarDate.value);
+});
+
 const openModal = (type, sell = {}) => {
   if (type === 'form') {
     operation.value = sell.id ? 2 : 1;
@@ -49,6 +57,7 @@ const openModal = (type, sell = {}) => {
     form.price = sell.price || '';
     form.comission = sell.comission !== undefined && sell.comission !== null ? sell.comission : '';
     form.sell_date = sell.sell_date ? sell.sell_date.substring(0, 10) : getTodayDate();
+    form.next_visit = sell.next_visit ? sell.next_visit.substring(0, 10) : '';
     form.client_id = sell.client_id || '';
     selectedSell.value.id = sell.id || null;
     showModalForm.value = true;
@@ -62,6 +71,7 @@ const closeModal = (type) => {
   if (type === 'form') {
     form.reset();
     form.sell_date = getTodayDate();
+    form.next_visit = '';
     showModalForm.value = false;
   }
   if (type === 'delete') showModalDel.value = false;
@@ -160,11 +170,44 @@ const formatDate = (dateStr) => {
             {{ totalEarnings.toFixed(2) }} €
           </p>
         </div>
+
+        <!-- Panel de Visitas del Día Seleccionado en el Calendario -->
+        <div v-if="selectedCalendarDate" class="mt-6 pt-4 border-t border-gray-100">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-purple-900">
+              Visitas programadas para el {{ formatDate(selectedCalendarDate) }}
+            </h3>
+            <button
+              @click="selectedCalendarDate = null"
+              class="text-xs text-gray-400 hover:text-gray-600 underline"
+            >
+              Cerrar filtro
+            </button>
+          </div>
+          <div v-if="selectedDayEvents.length > 0" class="mt-2 space-y-2">
+            <div
+              v-for="item in selectedDayEvents"
+              :key="item.id"
+              class="flex items-center justify-between p-2.5 rounded-md bg-purple-50 border border-purple-100 text-sm"
+            >
+              <div>
+                <span class="font-bold text-purple-950">{{ item.client_name }}</span>
+                <span class="text-gray-600 ml-2">({{ item.title }})</span>
+              </div>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded bg-purple-200 text-purple-800">
+                {{ item.price }} €
+              </span>
+            </div>
+          </div>
+          <p v-else class="text-xs text-gray-400 mt-1 italic">
+            No hay visitas agendadas para este día.
+          </p>
+        </div>
       </div>
 
       <!-- Calendario en la esquina (Ocupa 1 columna) -->
       <div class="md:col-span-1">
-        <MiniCalendar @select-day="onCalendarSelectDay" />
+        <MiniCalendar :events="calendarEvents" @select-day="onCalendarSelectDay" />
       </div>
     </div>
 
@@ -175,6 +218,7 @@ const formatDate = (dateStr) => {
           <thead>
             <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 border-b bg-purple-50">
               <th class="px-4 py-3">Fecha</th>
+              <th class="px-4 py-3">Próxima visita</th>
               <th class="px-4 py-3">Descripción</th>
               <th class="px-4 py-3">Cliente</th>
               <th class="px-4 py-3">Precio</th>
@@ -186,6 +230,15 @@ const formatDate = (dateStr) => {
           <tbody class="bg-white divide-y">
             <tr v-for="sell in sells.data" :key="sell.id" class="text-gray-700">
               <td class="px-4 py-3 text-sm whitespace-nowrap">{{ formatDate(sell.sell_date) }}</td>
+              <td class="px-4 py-3 text-sm whitespace-nowrap">
+                <span
+                  v-if="sell.next_visit"
+                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800"
+                >
+                  {{ formatDate(sell.next_visit) }}
+                </span>
+                <span v-else class="text-gray-400 text-xs">-</span>
+              </td>
               <td class="px-4 py-3 text-sm">{{ sell.title }}</td>
               <td class="px-4 py-3 text-sm">{{ sell.client?.name }}</td>
               <td class="px-4 py-3 text-sm">{{ sell.price }} €</td>
@@ -231,9 +284,15 @@ const formatDate = (dateStr) => {
             </div>
           </div>
 
-          <div>
-            <InputLabel value="Fecha de la venta" class="font-medium text-gray-700 mb-1" />
-            <InputGroup :text="'Fecha de la venta'" :type="'date'" :required="'required'" v-model="form.sell_date" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <InputLabel value="Fecha de la venta" class="font-medium text-gray-700 mb-1" />
+              <InputGroup :text="'Fecha de la venta'" :type="'date'" :required="'required'" v-model="form.sell_date" />
+            </div>
+            <div>
+              <InputLabel value="Próxima visita" class="font-medium text-gray-700 mb-1" />
+              <InputGroup :text="'Próxima visita'" :type="'date'" v-model="form.next_visit" />
+            </div>
           </div>
 
           <div>

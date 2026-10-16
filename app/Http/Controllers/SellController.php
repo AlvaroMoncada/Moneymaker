@@ -19,18 +19,36 @@ class SellController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
     
-        // Obtener TODAS las ventas sin paginación para calcular la ganancia total
-        $allSells = Sell::where('user_id', auth()->id())->get();
+        // Obtener TODAS las ventas sin paginación para calcular la ganancia total y eventos del calendario
+        $allSells = Sell::where('user_id', auth()->id())->with(['client'])->get();
     
         // Calcular el total de ganancias
         $totalEarnings = $allSells->sum(function ($sell) {
             return ($sell->price * ($sell->comission ?? 0)) / 100;
         });
+
+        // Eventos del calendario para próximas visitas
+        $calendarEvents = $allSells->filter(function ($sell) {
+            return !empty($sell->next_visit);
+        })->map(function ($sell) {
+            $formattedDate = $sell->next_visit instanceof \DateTimeInterface 
+                ? $sell->next_visit->format('Y-m-d') 
+                : substr((string)$sell->next_visit, 0, 10);
+
+            return [
+                'id' => $sell->id,
+                'date' => $formattedDate,
+                'title' => $sell->title,
+                'client_name' => $sell->client?->name ?? 'Sin cliente',
+                'price' => $sell->price,
+            ];
+        })->values();
     
         return Inertia::render('Sells/Index', [
             'sells' => $sells,
             'clients' => Client::where('user_id', auth()->id())->orderBy('name', 'asc')->get(),
             'totalEarnings' => $totalEarnings, // Enviar el total de ganancias al frontend
+            'calendarEvents' => $calendarEvents, // Enviar eventos de visitas al calendario
         ]);
     }
     
@@ -43,6 +61,7 @@ class SellController extends Controller
             'price' =>'required|numeric|max:9999999999999',
             'comission' => 'required|numeric|min:0|max:100',
             'sell_date' => 'required|date',
+            'next_visit' => 'nullable|date',
             'client_id' => 'required|exists:clients,id',
         ]);
 
@@ -54,6 +73,7 @@ class SellController extends Controller
             'price' => $request->price,
             'comission' => $request->comission,
             'sell_date' => $request->sell_date,
+            'next_visit' => $request->next_visit,
             'client_id' => $client->id,
             'user_id' => auth()->id(), // Asignar el usuario autenticado
         ]);
@@ -71,6 +91,7 @@ class SellController extends Controller
             'price' =>'required|numeric|max:9999999999999',
             'comission' => 'required|numeric|min:0|max:100',
             'sell_date' => 'required|date',
+            'next_visit' => 'nullable|date',
             'client_id' => 'required|exists:clients,id',
         ]);
 
@@ -87,6 +108,7 @@ class SellController extends Controller
             'price' => $request->price,
             'comission' => $request->comission,
             'sell_date' => $request->sell_date,
+            'next_visit' => $request->next_visit,
             'client_id' => $client->id,
         ]);
 

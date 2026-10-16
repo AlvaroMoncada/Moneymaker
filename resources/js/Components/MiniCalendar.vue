@@ -192,9 +192,9 @@ const handleDayClick = (day) => {
       </div>
       <div v-if="events.length > 0" class="flex items-center space-x-1.5">
         <span class="w-1.5 h-1.5 rounded-full bg-purple-600 inline-block"></span>
-        <span>Con eventos</span>
+        <span>Próxima visita</span>
       </div>
-      <span v-else class="text-gray-400 italic">Listo para eventos</span>
+      <span v-else class="text-gray-400 italic">Sin visitas programadas</span>
     </div>
   </div>
 </template>

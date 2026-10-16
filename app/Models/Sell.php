@@ -15,12 +15,14 @@ class Sell extends Model
         'title',
         'comission',
         'sell_date',
+        'next_visit',
         'client_id',
         'user_id', // Permitir asignación masiva del usuario
     ];
 
     protected $casts = [
         'sell_date' => 'date:Y-m-d',
+        'next_visit' => 'date:Y-m-d',
     ];
 
     /**

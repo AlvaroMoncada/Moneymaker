@@ -4,6 +4,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputLabel from '@/Components/InputLabel.vue';
 import InputGroup from '@/Components/InputGroup.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
@@ -13,7 +14,10 @@ const props = defineProps({
   clients: { type: Object },
 });
 
-const form = useForm({ name: '' });
+const form = useForm({
+  name: '',
+  address: '',
+});
 const selectedClient = ref({});
 const showModal = ref({ form: false, delete: false });
 const title = ref('');
@@ -21,11 +25,16 @@ const operation = ref(1);
 const msj = ref('');
 const classMsj = ref('hidden');
 
+const getGoogleMapsUrl = (address) => {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+};
+
 const openModal = (type, client = {}) => {
   if (type === 'form') {
     operation.value = client.id ? 2 : 1;
     title.value = client.id ? 'Editar cliente' : 'Crear cliente';
     form.name = client.name || '';
+    form.address = client.address || '';
     selectedClient.value.id = client.id || null;
     showModal.value.form = true;
   } else if (type === 'delete') {
@@ -36,7 +45,9 @@ const openModal = (type, client = {}) => {
 
 const closeModal = (type) => {
   showModal.value[type] = false;
-  if (type === 'form') form.reset();
+  if (type === 'form') {
+    form.reset();
+  }
 };
 
 const saveClient = () => {
@@ -46,7 +57,7 @@ const saveClient = () => {
   form[operation.value === 1 ? 'post' : 'put'](route(routeAction, routeId), {
     onSuccess: () => {
       closeModal('form');
-      showSuccessMessage('Cliente añadido');
+      showSuccessMessage(operation.value === 1 ? 'Cliente añadido' : 'Cliente actualizado');
     },
   });
 };
@@ -96,13 +107,37 @@ const showSuccessMessage = (message) => {
         <table class="w-full whitespace-no-wrap">
           <thead>
             <tr class="text-xs font-semibold text-gray-500 bg-purple-50">
-              <th class="px-4 py-3">Nombre</th>
+              <th class="px-4 py-3 text-left">Nombre</th>
+              <th class="px-4 py-3 text-left">Dirección</th>
               <th class="px-4 py-3 text-center">Opciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="client in clients.data" :key="client.id" class="text-gray-700">
-              <td class="px-4 py-3 text-sm">{{ client.name }}</td>
+            <tr v-for="client in clients.data" :key="client.id" class="text-gray-700 border-b last:border-0 hover:bg-gray-50 transition">
+              <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ client.name }}</td>
+              <td class="px-4 py-3 text-sm">
+                <div v-if="client.address" class="flex items-center space-x-2">
+                  <span class="text-gray-700">{{ client.address }}</span>
+                  <a
+                    :href="getGoogleMapsUrl(client.address)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Ver en Google Maps"
+                    class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 hover:text-purple-800 transition shadow-sm border border-purple-200"
+                  >
+                    <!-- Icono Map Pin -->
+                    <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Google Maps</span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+                <span v-else class="text-xs text-gray-400 italic">Sin dirección</span>
+              </td>
               <td class="px-4 py-3 flex justify-center space-x-2">
                 <PrimaryButton @click="openModal('form', client)">Editar</PrimaryButton>
                 <DangerButton @click="openModal('delete', client)">Eliminar</DangerButton>
@@ -122,12 +157,19 @@ const showSuccessMessage = (message) => {
     <!-- Modal Formulario -->
     <Modal :show="showModal.form" @close="closeModal('form')">
       <div class="p-6">
-        <h2 class="text-lg font-medium">{{ title }}</h2>
+        <h2 class="text-lg font-medium text-purple-900 border-b pb-2">{{ title }}</h2>
         <div class="space-y-4 mt-4">
-          <InputGroup :text="'Cliente'" v-model="form.name" />
+          <div>
+            <InputLabel value="Nombre del cliente" class="font-medium text-gray-700 mb-1" />
+            <InputGroup :text="'Nombre del cliente'" :required="'required'" v-model="form.name" />
+          </div>
+          <div>
+            <InputLabel value="Dirección" class="font-medium text-gray-700 mb-1" />
+            <InputGroup :text="'Ej. Av. de la Constitución 14, Sevilla'" v-model="form.address" />
+          </div>
         </div>
       </div>
-      <div class="flex justify-end mt-4 space-x-2 p-4">
+      <div class="flex justify-end mt-4 space-x-2 p-4 bg-gray-50 rounded-b-lg">
         <SecondaryButton @click="closeModal('form')">Cancelar</SecondaryButton>
         <PrimaryButton @click="saveClient">Guardar</PrimaryButton>
       </div>

@@ -24,10 +24,12 @@ class ClientController extends Controller
     {
         $request->validate([
             'name' =>'required|max:100',
+            'address' => 'nullable|string|max:255',
         ]);
 
         $client = new Client([
             'name' => $request->name,
+            'address' => $request->address,
             'user_id' => auth()->id(), // Asignar el usuario autenticado
         ]);
 
@@ -41,13 +43,14 @@ class ClientController extends Controller
     {
         $request->validate([
             'name' =>'required|max:100',
+            'address' => 'nullable|string|max:255',
         ]);
 
         $client = Client::where('id', $client->id)
             ->where('user_id', auth()->id()) // Asegurar que el cliente pertenece al usuario
             ->firstOrFail();
 
-        $client->update($request->only(['name']));
+        $client->update($request->only(['name', 'address']));
 
         return redirect()->route('clients.index');
     }
