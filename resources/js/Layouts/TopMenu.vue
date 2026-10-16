@@ -11,6 +11,7 @@
 
           <!-- Botón Volver al Inicio visible en todas las páginas -->
           <Link
+            v-if="!route().current('dashboard')"
             :href="route('dashboard')"
             class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200"
             :class="route().current('dashboard') 
@@ -29,7 +30,8 @@
         <Dropdown>
           <template #trigger>
             <button class="align-middle rounded-full focus:shadow-outline-gray focus:outline-none" aria-label="Account" aria-haspopup="true">
-              {{ $page.props.auth.user.name }}
+              <span class="hidden sm:inline text-gray-500">Bienvenido a <span class="font-bold text-purple-700">misVentas</span>,</span>
+              <span class="font-semibold text-gray-800">{{ $page.props.auth.user.name }}</span>
             </button>
           </template>
 
